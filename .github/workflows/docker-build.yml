@@ -79,4 +79,4 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            WUD_VERSION=${{ github.sha::0:7 }}
+            WUD_VERSION=${{ steps.sha.outputs.short }}
