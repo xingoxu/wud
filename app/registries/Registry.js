@@ -318,7 +318,7 @@ class Registry extends Component {
                     ) {
                         if (
                             error.response.status === 429 &&
-                            error.response.errors.some((error) =>
+                            error.response.data.errors.some((error) =>
                                 /retry-after:\s*[\d.]+[µm]s/.test(
                                     error.message,
                                 ),
