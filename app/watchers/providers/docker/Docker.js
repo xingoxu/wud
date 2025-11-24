@@ -31,7 +31,7 @@ const {
 } = require('../../../model/container');
 const registry = require('../../../registry');
 const { getWatchContainerGauge } = require('../../../prometheus/watcher');
-const { wait, RandomNum } = require('../../../utils');
+const { wait, RandomNum, DISTRIBUTED_WAIT_TIME } = require('../../../utils');
 
 // The delay before starting the watcher when the app is started
 const START_WATCHER_DELAY_MS = 1000;
@@ -503,7 +503,7 @@ class Docker extends Component {
         try {
             const containerReports = await Promise.all(
                 containers.map(async (container) => {
-                    await wait(RandomNum(0, 100));
+                    await wait(RandomNum(0, DISTRIBUTED_WAIT_TIME));
                     return this.watchContainer(container);
                 }),
             );

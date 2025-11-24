@@ -1,3 +1,5 @@
+const DISTRIBUTED_WAIT_TIME = 200;
+
 /**
  * Wait for a specified amount of time
  * @param {number} time - Time to wait in milliseconds
@@ -23,4 +25,5 @@ function RandomNum(Min, Max) {
 module.exports = {
     wait,
     RandomNum,
+    DISTRIBUTED_WAIT_TIME,
 };

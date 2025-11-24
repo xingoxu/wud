@@ -299,6 +299,19 @@ class Registry extends Component {
                 { type: this.type, name: this.name },
                 (end - start) / 1000,
             );
+
+            // Handle axios error with detailed response information
+            if (error.response) {
+                const errorDetails = {
+                    status: error.response.status,
+                    data: error.response.data,
+                };
+                const enhancedError = new Error(
+                    `${JSON.stringify(errorDetails)}`,
+                );
+                enhancedError.cause = error;
+            }
+
             throw error;
         }
     }

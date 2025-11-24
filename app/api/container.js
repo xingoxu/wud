@@ -6,6 +6,7 @@ const { getServerConfiguration } = require('../configuration');
 const { mapComponentsToList } = require('./component');
 const Trigger = require('../triggers/providers/Trigger');
 const log = require('../log').child({ component: 'container' });
+const { wait, RandomNum, DISTRIBUTED_WAIT_TIME } = require('../utils');
 
 const router = express.Router();
 
@@ -90,7 +91,10 @@ function deleteContainer(req, res) {
 async function watchContainers(req, res) {
     try {
         await Promise.all(
-            Object.values(getWatchers()).map((watcher) => watcher.watch()),
+            Object.values(getWatchers()).map(async (watcher) => {
+                await wait(RandomNum(0, DISTRIBUTED_WAIT_TIME));
+                return watcher.watch();
+            }),
         );
         getContainers(req, res);
     } catch (e) {
