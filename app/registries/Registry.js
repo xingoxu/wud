@@ -325,7 +325,7 @@ class Registry extends Component {
                             )
                         ) {
                             this.log.info(
-                                `${this.getId()} - ${image.name}:${tagOrDigest} retry callRegistry`,
+                                `${this.getId()} - ${image.name} retry callRegistry`,
                             );
                             await wait(1000);
                             continue;
