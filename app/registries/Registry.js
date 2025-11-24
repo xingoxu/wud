@@ -312,7 +312,6 @@ class Registry extends Component {
                         `${JSON.stringify(errorDetails)}`,
                     );
                     enhancedError.cause = error;
-                    error = enhancedError;
                     if (
                         url.startsWith('ghcr.io') ||
                         url.startsWith('https://ghcr.io')
@@ -332,6 +331,7 @@ class Registry extends Component {
                             continue;
                         }
                     }
+                    error = enhancedError;
                 }
 
                 throw error;
