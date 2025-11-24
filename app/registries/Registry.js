@@ -2,6 +2,7 @@ const axios = require('axios');
 const log = require('../log');
 const Component = require('../registry/Component');
 const { getSummaryTags } = require('../prometheus/registry');
+const { wait } = require('../utils');
 
 /**
  * Docker Registry Abstract class.
@@ -285,36 +286,57 @@ class Registry extends Component {
             axiosOptions,
         );
 
-        try {
-            const response = await axios(axiosOptionsWithAuth);
-            const end = new Date().getTime();
-            getSummaryTags().observe(
-                { type: this.type, name: this.name },
-                (end - start) / 1000,
-            );
-            return resolveWithFullResponse ? response : response.data;
-        } catch (error) {
-            const end = new Date().getTime();
-            getSummaryTags().observe(
-                { type: this.type, name: this.name },
-                (end - start) / 1000,
-            );
-
-            // Handle axios error with detailed response information
-            if (error.response) {
-                const errorDetails = {
-                    status: error.response.status,
-                    data: error.response.data,
-                };
-                const enhancedError = new Error(
-                    `${JSON.stringify(errorDetails)}`,
+        do {
+            try {
+                const response = await axios(axiosOptionsWithAuth);
+                const end = new Date().getTime();
+                getSummaryTags().observe(
+                    { type: this.type, name: this.name },
+                    (end - start) / 1000,
                 );
-                enhancedError.cause = error;
-                error = enhancedError;
-            }
+                return resolveWithFullResponse ? response : response.data;
+            } catch (error) {
+                const end = new Date().getTime();
+                getSummaryTags().observe(
+                    { type: this.type, name: this.name },
+                    (end - start) / 1000,
+                );
 
-            throw error;
-        }
+                // Handle axios error with detailed response information
+                if (error.response) {
+                    const errorDetails = {
+                        status: error.response.status,
+                        data: error.response.data,
+                    };
+                    const enhancedError = new Error(
+                        `${JSON.stringify(errorDetails)}`,
+                    );
+                    enhancedError.cause = error;
+                    error = enhancedError;
+                    if (
+                        url.startsWith('ghcr.io') ||
+                        url.startsWith('https://ghcr.io')
+                    ) {
+                        if (
+                            error.response.status === 429 &&
+                            error.response.errors.some((error) =>
+                                /retry-after:\s*[\d.]+[µm]s/.test(
+                                    error.message,
+                                ),
+                            )
+                        ) {
+                            this.log.info(
+                                `${this.getId()} - ${image.name}:${tagOrDigest} retry callRegistry`,
+                            );
+                            await wait(1000);
+                            continue;
+                        }
+                    }
+                }
+
+                throw error;
+            }
+        } while (true);
     }
 
     getImageFullName(image, tagOrDigest) {
