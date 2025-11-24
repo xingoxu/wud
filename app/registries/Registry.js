@@ -310,6 +310,7 @@ class Registry extends Component {
                     `${JSON.stringify(errorDetails)}`,
                 );
                 enhancedError.cause = error;
+                error = enhancedError;
             }
 
             throw error;
